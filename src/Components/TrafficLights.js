@@ -1,13 +1,30 @@
 import React, { useEffect } from "react";
 import axios from "axios";
 import Geolocation from "react-native-geolocation-service";
+import TablePagination from "@material-ui/core/TablePagination";
 
 function TrafficLights(props) {
   let url = props.datetime;
+  let lat = "";
+  let long = "";
+  const key = "AIzaSyDvFF7juGaQNrE7onUVkdlWZpVDn_fgw7I";
 
   const [locations, setLocations] = React.useState([]);
   const [camInfo, setCamInfo] = React.useState([]);
+  const [geocodedLocations, setGeocodedLocations] = React.useState([]);
   const [imageUrl, setImageUrl] = React.useState("");
+
+  const [page, setPage] = React.useState(2);
+  const [rowsPerPage, setRowsPerPage] = React.useState(10);
+
+  const handleChangePage = (event, newPage) => {
+    setPage(newPage);
+  };
+
+  const handleChangeRowsPerPage = (event) => {
+    setRowsPerPage(parseInt(event.target.value, 10));
+    setPage(0);
+  };
   useEffect(() => getData(url), [props.datetime]);
 
   function getData(url) {
@@ -20,6 +37,7 @@ function TrafficLights(props) {
       })
       .then(function (response) {
         let locations = [];
+        let geocodedLocations = [];
         let camInfo = response.data.items[0].cameras;
         setCamInfo(camInfo);
         camInfo.map((c) => {
@@ -28,6 +46,12 @@ function TrafficLights(props) {
         // console.log(camInfo);
         console.log(locations);
         setLocations(locations);
+
+        //#1. loop locations (gogole)
+        //#2. xall method for each of the locations (method )
+        //#3. getgeoString for each locations -> store as array
+
+        // setGeocodedLocations(geocodeLatLng(key, locations));
       })
       .catch(function (error) {
         // handle error
@@ -39,41 +63,34 @@ function TrafficLights(props) {
     setImageUrl(camInfo[id].image);
   }
 
-  // function geocodeLatLng(geocoder, map, infowindow) {
-  //   const input = document.getElementById("latlng").value;
-  //   const latlngStr = input.split(",", 2);
-  //   const latlng = {
-  //     lat: parseFloat(latlngStr[0]),
-  //     lng: parseFloat(latlngStr[1]),
-  //   };
-  //   geocoder.geocode(
-  //     {
-  //       location: latlng,
-  //     },
-  //     (results, status) => {
-  //       if (status === "OK") {
-  //         if (results[0]) {
-  //           map.setZoom(11);
-  //           const marker = new google.maps.Marker({
-  //             position: latlng,
-  //             map: map,
-  //           });
-  //           infowindow.setContent(results[0].formatted_address);
-  //           infowindow.open(map, marker);
-  //         } else {
-  //           window.alert("No results found");
-  //         }
-  //       } else {
-  //         window.alert("Geocoder failed due to: " + status);
-  //       }
-  //     }
-  //   );
-  // }
+  //step 2 method (set #3 here)
+  function geocodeLatLng(key, locations) {
+    {
+      locations.map((l, k) => {
+        lat = l.latitude;
+        long = l.longitude;
+
+        let url = `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${long}&key=${key}`;
+        axios
+          .get(url)
+          .then(function (response) {
+            console.log(response.data);
+          })
+          .catch(function (error) {
+            // handle error
+            // console.log(error);
+          });
+      });
+    }
+    //
+  }
 
   return (
     // getData(url),
     <div>
       <ul>
+        {/* // map  new array with string geocode
+// */}
         {locations.map((l, k) => (
           <li>
             <button
@@ -86,6 +103,14 @@ function TrafficLights(props) {
       </ul>
       <img src={imageUrl} alt="trafficImage" />
     </div>
+    //   <TablePagination
+    //   component="div"
+    //   count={100}
+    //   page={page}
+    //   onChangePage={handleChangePage}
+    //   rowsPerPage={rowsPerPage}
+    //   onChangeRowsPerPage={handleChangeRowsPerPage}
+    // />
   );
 }
 
