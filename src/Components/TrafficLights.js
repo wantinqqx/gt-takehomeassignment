@@ -55,9 +55,10 @@ function TrafficLights(props) {
       });
   }
 
-  // function displayCameraData(id) {
-  //   setImageUrl(camInfo[id].image);
-  // }
+  function displayCameraData(id) {
+    console.log(camInfo[id].image);
+    // setImageUrl(camInfo[id].image);
+  }
   // function geocodeLatLng(key, locations) {
   //   {
   //     locations.map((l, k) => {
@@ -80,7 +81,7 @@ function TrafficLights(props) {
   // }
 
   return (
-    <LocationTable locations={locations} />
+    <LocationTable locations={locations} camInfo={camInfo} />
     // getData(url),
     //     <div>
     //       <ul>

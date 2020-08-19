@@ -37,6 +37,12 @@
   justify-content: center;
 }
 
+.responsive {
+  max-width: 600px;
+  height: auto;
+  align-items: center;
+}
+
 .space-align-container {
   /* display: flex;
   align-item: flex-start;
@@ -44,6 +50,7 @@
 
   /* height: 10em; */
   padding-top: 2%;
+  padding-bottom: 2%;
   display: flex;
   align-items: center;
   justify-content: center;

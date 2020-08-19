@@ -4,10 +4,13 @@ import axios from "axios";
 
 function LocationTable(props) {
   let data = props.locations;
+  let camInfo = props.camInfo;
   const initial = data.slice(0, 20);
   const [currLocations, setCurrentLocations] = React.useState([]);
   let [pData, setPData] = React.useState([]);
+  const [imageUrl, setImageUrl] = React.useState("");
   const [isLoading, setIsLoading] = React.useState(false);
+  const [showResults, setShowResults] = React.useState(false);
 
   useEffect(() => {
     initializeDisplayArray(data);
@@ -34,6 +37,10 @@ function LocationTable(props) {
       pageSize
     );
     setIsLoading(false);
+  }
+
+  function displayCameraImg(locIndex) {
+    setImageUrl(camInfo[locIndex].image);
   }
 
   function initializeDisplayArray(initialArray) {
@@ -117,12 +124,28 @@ function LocationTable(props) {
   }
 
   return (
-    <Table
-      columns={columns}
-      dataSource={pData}
-      onChange={handlePageChange}
-      loading={isLoading}
-    />
+    <div>
+      <Table
+        onRow={(r, i) => {
+          return {
+            onClick: (e) => {
+              console.log(r.key);
+              displayCameraImg(r.key);
+              setShowResults(true);
+            },
+          };
+        }}
+        columns={columns}
+        dataSource={pData}
+        onChange={handlePageChange}
+        // onRow={getCamInfo}
+        loading={isLoading}
+      />
+
+      {showResults ? (
+        <img src={imageUrl} alt="trafficImage" class="responsive" />
+      ) : null}
+    </div>
   );
 }
 
