@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Table } from "antd";
 import axios from "axios";
 
@@ -7,84 +7,104 @@ function LocationTable(props) {
   const initial = data.slice(0, 20);
   const [currLocations, setCurrentLocations] = React.useState([]);
   let [pData, setPData] = React.useState([]);
+  const [isLoading, setIsLoading] = React.useState(false);
 
-  console.table(currLocations);
-  geocodeLatLng("AIzaSyDvFF7juGaQNrE7onUVkdlWZpVDn_fgw7I", initial);
+  useEffect(() => {
+    initializeDisplayArray(data);
+  }, [props.locations]);
 
   const columns = [
-    { title: "Test", key: "name", dataIndex: "name" },
+    { title: "Area", key: "name", dataIndex: "name" },
     {
-      title: "location",
+      title: "Street",
       dataIndex: "location",
       key: "location",
+      render: (text) => <a>{text}</a>,
     },
   ];
 
-  //   pData = [
-  //     {
-  //       key: 1,
-  //       name: "Test",
-  //       location: "locat",
-  //     },
-  //     {
-  //       key: 2,
-  //       name: "Test",
-  //       location: "locat",
-  //     },
-  //   ];
+  async function handlePageChange(e) {
+    let currentPage = e.current;
+    const pageSize = 10;
+    setIsLoading(true);
+    await geocodeLatLng(
+      "AIzaSyDvFF7juGaQNrE7onUVkdlWZpVDn_fgw7I",
+      data,
+      e.current - 1,
+      pageSize
+    );
+    setIsLoading(false);
+  }
+
+  function initializeDisplayArray(initialArray) {
+    let fOut = initialArray.map((item, k) => {
+      return {
+        key: k,
+        name: `item ${k}`,
+        location: `location ${k}`,
+      };
+    });
+    setPData(fOut);
+  }
 
   console.log(`Curr : ${currLocations}`);
 
-  function geocodeLatLng(key, locations) {
+  function geocodeLatLng(key, locationsArray, startIndex, pageSize) {
     let promiseList = [];
-    locations.map((l, k) => {
+    let pageArray = locationsArray.slice(startIndex, startIndex + pageSize);
+    pageArray.map((l) => {
       let lat = l.latitude;
       let long = l.longitude;
 
       let url = `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${long}&key=${key}`;
       let p = axios.get(url);
       promiseList.push(p);
-
-      // axios
-      //   .get(url)
-      //   .then((response) => {
-      //     setCurrentLocations([
-      //       ...currLocations,
-      //       {
-      //         key: k,
-      //         name: "Test",
-      //         location: response.data.results[0].formatted_address,
-      //       },
-      //     ]);
-      //   })
-      //   .catch(function (error) {
-      //     // handle error
-      //     // console.log(error);
-      //   });
     });
     Promise.all(promiseList).then((out) => {
-      if (out) {
-        // console.log(out[0].data.results[0].formatted_address);
-
-        // let locationInfo = out.data.results;
-        out.map((index) => {
-          // get each index
-          const result = index.data.results;
-
-          const formattedStreet = result[0].formatted_address;
-          console.log(formattedStreet);
-          const formattedAddress = result[result.length - 3].formatted_address;
-          console.log(formattedAddress);
-
-          setPData([
-            {
-              key: index,
-              name: formattedStreet,
-              location: formattedAddress,
-            },
-          ]);
+      let tmp = out.map((x) => x.data.results);
+      let formattedLocations = tmp.map((t, k) => {
+        return {
+          key: k + startIndex * pageSize,
+          location: t[0].formatted_address,
+          name:
+            t[t.length - 3] !== undefined
+              ? t[t.length - 3].formatted_address
+              : "",
+        };
+      });
+      let s = pData;
+      s.map((x) => {
+        formattedLocations.map((f) => {
+          if (x.key === f.key) {
+            console.log(x.key);
+            s[x.key].location = f.location;
+            s[x.key].name = f.name;
+          }
         });
-      }
+      });
+      setPData(s);
+      // if (out) {
+      //   // console.log(out[0].data.results[0].formatted_address);
+
+      //   // let locationInfo = out.data.results;
+      //   out.map((index) => {
+      //     // get each index
+      //     const result = index.data.results;
+
+      //     const formattedStreet = result[0].formatted_address;
+      //     console.log(formattedStreet);
+      //     const formattedAddress = result[result.length - 3].formatted_address;
+      //     console.log(formattedAddress);
+
+      //     setPData([
+      //       {
+      //         key: index,
+      //         name: formattedStreet,
+      //         location: formattedAddress,
+      //       },
+      //     ]);
+      //   });
+      // }
 
       //   let locationInfo = out;
       //     setPData(camInfo);
@@ -96,7 +116,14 @@ function LocationTable(props) {
     });
   }
 
-  return <Table columns={columns} dataSource={pData} />;
+  return (
+    <Table
+      columns={columns}
+      dataSource={pData}
+      onChange={handlePageChange}
+      loading={isLoading}
+    />
+  );
 }
 
 export default LocationTable;
