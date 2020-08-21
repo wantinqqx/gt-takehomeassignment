@@ -1,17 +1,16 @@
 import React from "react";
 import "./App.css";
 import { DatePicker, TimePicker, Button, Space } from "antd";
-import moment from "moment";
-import TrafficLights from "./Components/TrafficLights.js";
-import WeatherForecast from "./Components/WeatherForecast.js";
+import TrafficWeatherConditions from "./Components/TrafficWeatherConditions.js";
 
-export default function TrafficWeatherConditions() {
+export default function App() {
   const dateFormatList = ["DD-MM-YYYY", "HH:mm:ss"];
 
   const [selectedDate, setSelectedDate] = React.useState("");
   const [selectedTime, setSelectedTime] = React.useState(new Date());
   const [datetime, setDatetime] = React.useState(new Date());
-  const [showResults, setShowResults] = React.useState(false);
+  const [showTrafficResults, setShowTrafficResults] = React.useState(false);
+  // const [showWeatherResults, setShowWeatherResults] = React.useState(false);
 
   const handleDateChange = (date) => {
     if (date !== null) {
@@ -48,10 +47,11 @@ export default function TrafficWeatherConditions() {
       console.log(dateTime);
 
       if (dateTime.length === 19) {
-        setShowResults(true);
+        setShowTrafficResults(true);
       }
     } else {
-      setShowResults(false);
+      setShowTrafficResults(false);
+      // setShowWeatheresults(false);
       alert("Date & Time cannot be empty!");
     }
   };
@@ -77,7 +77,9 @@ export default function TrafficWeatherConditions() {
         <Button type="primary" block onClick={handleDateTimeChange}>
           Check Traffic & Weather Conditions
         </Button>
-        {showResults ? <TrafficLights datetime={datetime} /> : null}
+        {showTrafficResults ? <TrafficWeatherConditions datetime={datetime} /> : null}
+        <br/>
+        {/* {showWeatherResults ? <WeatherForecast datetime={datetime} /> : null} */}
       </Space>
     </div>
 

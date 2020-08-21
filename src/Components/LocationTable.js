@@ -1,23 +1,35 @@
 import React, { useEffect } from "react";
-import { Table } from "antd";
+import { Table , Card} from "antd";
 import axios from "axios";
 
 function LocationTable(props) {
-  let data = props.locations;
+  const defaultPageSize = 10;
+  const defaultPageIndex = 0;
+  const { Meta } = Card;
+  let latLngList = props.locations;
+  let weatherInfoList = props.weather;
   let camInfo = props.camInfo;
-  const initial = data.slice(0, 20);
-  const [currLocations, setCurrentLocations] = React.useState([]);
-  let [pData, setPData] = React.useState([]);
+  let [tableData, setTableData] = React.useState([]);
   const [imageUrl, setImageUrl] = React.useState("");
+  const [weatherInfo, setWeatherInfo] = React.useState("");
+  const [selectedLocation, setSelectedLocation] = React.useState("");
   const [isLoading, setIsLoading] = React.useState(false);
-  const [showResults, setShowResults] = React.useState(false);
+  const [showResultsImage, setShowResultsImage] = React.useState(false);
+  const [showResultsWeather, setShowResultsWeather] = React.useState(false);
 
   useEffect(() => {
-    initializeDisplayArray(data);
-  }, [props.locations]);
+    setIsLoading(true);
+    async function fetchData() {
+      await initializeDisplayArray(latLngList,defaultPageIndex,defaultPageSize,latLngList);
+      setIsLoading(false);
+    }
+    fetchData();
+  }, [latLngList]);
 
   const columns = [
-    { title: "Area", key: "name", dataIndex: "name" },
+    { title: "Area",
+     key: "area",
+      dataIndex: "area" },
     {
       title: "Street",
       dataIndex: "location",
@@ -27,39 +39,63 @@ function LocationTable(props) {
   ];
 
   async function handlePageChange(e) {
-    let currentPage = e.current;
-    const pageSize = 10;
+    const currentPage = e.current - 1;
+    const pageSize = e.pageSize;
     setIsLoading(true);
-    await geocodeLatLng(
-      "AIzaSyDvFF7juGaQNrE7onUVkdlWZpVDn_fgw7I",
-      data,
-      e.current - 1,
-      pageSize
-    );
+    await latLngToLocationList(tableData, currentPage, pageSize, latLngList);
     setIsLoading(false);
   }
 
-  function displayCameraImg(locIndex) {
-    setImageUrl(camInfo[locIndex].image);
+  async function latLngToLocationList( initialArray, currentPage, pageSize, latLngLocationArr ) {
+    console.log(`Current page: ${currentPage}, PageSize: ${pageSize}`);
+    let promises = getReverseGeocodePromises("AIzaSyDtzkW7NA67657v2pinYP5ZWY1lsIrWSrs", latLngLocationArr, currentPage, pageSize);
+    let resolvedList = await Promise.all(promises);
+    let output = formatToTableDefinitions(initialArray,resolvedList, currentPage, pageSize);
+    // console.table(output);
+    setTableData(output);
   }
 
-  function initializeDisplayArray(initialArray) {
+  async function initializeDisplayArray(initialArray,initialPageIndex,initialPageSize) {
     let fOut = initialArray.map((item, k) => {
       return {
         key: k,
-        name: `item ${k}`,
+        area: `item ${k}`,
         location: `location ${k}`,
       };
     });
-    setPData(fOut);
+    await latLngToLocationList(fOut,initialPageIndex,initialPageSize,latLngList);
   }
 
-  console.log(`Curr : ${currLocations}`);
+  function formatToTableDefinitions(propData,geocodeResponse, startIndex, pageSize) {
+    let rGeocodeArr = geocodeResponse.map((item) => item.data.results);
+    let formattedLocations = rGeocodeArr.map((t, k) => {
+      return {
+        key: k + startIndex * pageSize,
+        location: t[0].formatted_address,
+        area:
+          t[t.length - 3] !== undefined
+            ? t[t.length - 3].formatted_address
+            : "",
+      };
+    });
+    let s = propData;
+    console.log(propData);
+    s.forEach((x) => {
+      formattedLocations.forEach((f) => {
+        if (x.key === f.key) {
+          s[x.key].location = f.location;
+          s[x.key].area = f.area;
+        }
+      });
+    });
+    return s;
+  }
 
-  function geocodeLatLng(key, locationsArray, startIndex, pageSize) {
+  function getReverseGeocodePromises( key,locationsArray, startIndex, pageSize) {
     let promiseList = [];
-    let pageArray = locationsArray.slice(startIndex, startIndex + pageSize);
-    pageArray.map((l) => {
+    const start = startIndex * pageSize;
+    let pageArray = locationsArray.slice(start, start + pageSize);
+    pageArray.forEach((l) => {
       let lat = l.latitude;
       let long = l.longitude;
 
@@ -67,59 +103,24 @@ function LocationTable(props) {
       let p = axios.get(url);
       promiseList.push(p);
     });
-    Promise.all(promiseList).then((out) => {
-      let tmp = out.map((x) => x.data.results);
-      let formattedLocations = tmp.map((t, k) => {
-        return {
-          key: k + startIndex * pageSize,
-          location: t[0].formatted_address,
-          name:
-            t[t.length - 3] !== undefined
-              ? t[t.length - 3].formatted_address
-              : "",
-        };
-      });
-      let s = pData;
-      s.map((x) => {
-        formattedLocations.map((f) => {
-          if (x.key === f.key) {
-            console.log(x.key);
-            s[x.key].location = f.location;
-            s[x.key].name = f.name;
-          }
-        });
-      });
-      setPData(s);
-      // if (out) {
-      //   // console.log(out[0].data.results[0].formatted_address);
+    return promiseList;
+  }
 
-      //   // let locationInfo = out.data.results;
-      //   out.map((index) => {
-      //     // get each index
-      //     const result = index.data.results;
+  function displayCameraImg(locIndex) {
+    setImageUrl(camInfo[locIndex].image);
+  }
 
-      //     const formattedStreet = result[0].formatted_address;
-      //     console.log(formattedStreet);
-      //     const formattedAddress = result[result.length - 3].formatted_address;
-      //     console.log(formattedAddress);
+  function displayWeatherInfo(userSelectedArea) {
+    console.log(weatherInfoList);
 
-      //     setPData([
-      //       {
-      //         key: index,
-      //         name: formattedStreet,
-      //         location: formattedAddress,
-      //       },
-      //     ]);
-      //   });
-      // }
+    weatherInfoList.forEach((area) => {
+      const defaultArea = userSelectedArea.split(',');
+      let selectedArea = defaultArea[0];
 
-      //   let locationInfo = out;
-      //     setPData(camInfo);
-      //     camInfo.map((c) => {
-      //       locations.push(c.location);
-      //     });
-
-      //   setPData(out);
+      if(area.area === selectedArea){
+        setWeatherInfo(area.forecast);
+        console.log(weatherInfo);
+      }
     });
   }
 
@@ -129,22 +130,24 @@ function LocationTable(props) {
         onRow={(r, i) => {
           return {
             onClick: (e) => {
-              console.log(r.key);
+              // console.log(r.area);
+              // console.log(r.location);
+              // console.log(r.key);
+              displayWeatherInfo(r.area);
+              setSelectedLocation(r.location);
               displayCameraImg(r.key);
-              setShowResults(true);
+              setShowResultsImage(true);
+              setShowResultsWeather(true);
             },
           };
         }}
-        columns={columns}
-        dataSource={pData}
-        onChange={handlePageChange}
-        // onRow={getCamInfo}
-        loading={isLoading}
+        columns={columns} dataSource={tableData} onChange={handlePageChange} loading={isLoading}
       />
 
-      {showResults ? (
-        <img src={imageUrl} alt="trafficImage" class="responsive" />
-      ) : null}
+      {showResultsImage ? (
+         <Card hoverable className="responsive" cover={<img src={imageUrl} alt="trafficImage"  />} >
+           <Meta title={selectedLocation} description={weatherInfo} /></Card>
+         ) : null}
     </div>
   );
 }
