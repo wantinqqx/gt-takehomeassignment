@@ -1,6 +1,5 @@
 import React, { useEffect } from "react";
 import axios from "axios";
-// import Geolocation from "react-native-geolocation-service";
 import LocationTable from "./LocationTable";
 import App from "../App";
 
@@ -10,22 +9,20 @@ function TrafficWeatherConditions(props) {
   const [locations, setLocations] = React.useState([]);
   const [camInfo, setCamInfo] = React.useState([]);
   const [forecasts, setForecastInfo] = React.useState([]);
-  // const [weatherForecastInfo, setWeatherForecastInfo] = React.useState([]);
-  //   const [imageUrl, setImageUrl] = React.useState("");
 
   useEffect(() => getData(selDateTime), [selDateTime]);
 
 
-  function getData(url) {
-      getTrafficData(url);
-      getWeatherData(url);
+  function getData(dateTime) {
+      getTrafficData(dateTime);
+      getWeatherData(dateTime);
   }
 
-  function getTrafficData(url) {
+  function getTrafficData(dateTime) {
     axios
       .get("https://api.data.gov.sg/v1/transport/traffic-images", {
         params: {
-          date_time: url,
+          date_time: dateTime,
         },
       })
       .then(function (response) {
@@ -41,11 +38,11 @@ function TrafficWeatherConditions(props) {
       });
   }  
 
-  function getWeatherData(url) {
+  function getWeatherData(dateTime) {
     axios
       .get("https://api.data.gov.sg/v1/environment/2-hour-weather-forecast", {
         params: {
-          date_time: url,
+          date_time: dateTime,
         },
       })
       .then(function (response) {

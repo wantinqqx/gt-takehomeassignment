@@ -6,11 +6,13 @@ function LocationTable(props) {
   const defaultPageSize = 10;
   const defaultPageIndex = 0;
   const { Meta } = Card;
+  
   let latLngList = props.locations;
   let weatherInfoList = props.weather;
   let camInfo = props.camInfo;
   let [tableData, setTableData] = React.useState([]);
   const [imageUrl, setImageUrl] = React.useState("");
+
   const [weatherInfo, setWeatherInfo] = React.useState("");
   const [selectedLocation, setSelectedLocation] = React.useState("");
   const [isLoading, setIsLoading] = React.useState(false);
@@ -48,7 +50,7 @@ function LocationTable(props) {
 
   async function latLngToLocationList( initialArray, currentPage, pageSize, latLngLocationArr ) {
     console.log(`Current page: ${currentPage}, PageSize: ${pageSize}`);
-    let promises = getReverseGeocodePromises("AIzaSyDtzkW7NA67657v2pinYP5ZWY1lsIrWSrs", latLngLocationArr, currentPage, pageSize);
+    let promises = getReverseGeocodePromises(process.env.REACT_APP_API_KEY, latLngLocationArr, currentPage, pageSize);
     let resolvedList = await Promise.all(promises);
     let output = formatToTableDefinitions(initialArray,resolvedList, currentPage, pageSize);
     // console.table(output);

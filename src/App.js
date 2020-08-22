@@ -4,6 +4,7 @@ import { DatePicker, TimePicker, Button, Space } from "antd";
 import TrafficWeatherConditions from "./Components/TrafficWeatherConditions.js";
 
 export default function App() {
+  require('dotenv').config();
   const dateFormatList = ["DD-MM-YYYY", "HH:mm:ss"];
 
   const [selectedDate, setSelectedDate] = React.useState("");
@@ -23,10 +24,8 @@ export default function App() {
 
   const handleTimeChange = (time) => {
     if (time !== null) {
-      console.log(time);
       time = time.format("HH:mm:ss");
       setSelectedTime(time);
-      console.log(selectedTime);
     } else if (time === "") {
       setSelectedTime("");
     }
@@ -35,13 +34,7 @@ export default function App() {
   const handleDateTimeChange = () => {
     // console.log(selectedTime);
     // console.log(selectedDate === "");
-    if (
-      selectedTime !== null &&
-      selectedTime !== "" &&
-      selectedDate !== "" &&
-      selectedDate !== null
-    ) {
-      console.log(selectedDate);
+    if (selectedTime !== null && selectedTime !== "" && selectedDate !== "" && selectedDate !== null) {
       const dateTime = selectedDate + "T" + selectedTime;
       setDatetime(dateTime);
       console.log(dateTime);
@@ -79,41 +72,7 @@ export default function App() {
         </Button>
         {showTrafficResults ? <TrafficWeatherConditions datetime={datetime} /> : null}
         <br/>
-        {/* {showWeatherResults ? <WeatherForecast datetime={datetime} /> : null} */}
       </Space>
     </div>
-
-    // {/* <MuiPickersUtilsProvider utils={DateFnsUtils}>
-    //   <Grid container justify="space-around">
-    //     <KeyboardDatePicker
-    //       margin="normal"
-    //       id="date-picker-dialog"
-    //       label="Date"
-    //       format="MM/dd/yyyy"
-    //       value={selectedDate}
-    //       onChange={handleDateChange}
-    //       KeyboardButtonProps={{
-    //         "aria-label": "change date",
-    //       }}
-    //     />
-    //     <KeyboardTimePicker
-    //       margin="normal"
-    //       id="time-picker"
-    //       label="Time"
-    //       value={selectedTime}
-    //       onChange={handleTimeChange}
-    //       KeyboardButtonProps={{
-    //         "aria-label": "change time",
-    //       }}
-    //     />
-    //   </Grid>
-    //   <Grid container justify="space-around"> */}
-    // {/* <TrafficLights datetime={datetime} />
-    //   </Grid>
-
-    //   <Grid container justify="space-around">
-    //     <WeatherForecast datetime={datetime} />
-    //   </Grid>
-    // </MuiPickersUtilsProvider> */}
   );
 }
