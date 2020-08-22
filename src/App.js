@@ -1,17 +1,17 @@
 import React from "react";
 import "./App.css";
-import { DatePicker, TimePicker, Button, Space } from "antd";
+import { DatePicker, TimePicker, Button, Space, Layout } from "antd";
+import moment from "moment";
 import TrafficWeatherConditions from "./Components/TrafficWeatherConditions.js";
 
 export default function App() {
   require('dotenv').config();
-  const dateFormatList = ["DD-MM-YYYY", "HH:mm:ss"];
 
+  const { Header, Content, Footer } = Layout;
   const [selectedDate, setSelectedDate] = React.useState("");
   const [selectedTime, setSelectedTime] = React.useState(new Date());
   const [datetime, setDatetime] = React.useState(new Date());
   const [showTrafficResults, setShowTrafficResults] = React.useState(false);
-  // const [showWeatherResults, setShowWeatherResults] = React.useState(false);
 
   const handleDateChange = (date) => {
     if (date !== null) {
@@ -50,29 +50,29 @@ export default function App() {
   };
 
   return (
-    <div className="space-align-container">
-      <Space direction="vertical" size={12}>
-        <div className="inline">
-          <Space size="large">
-            <DatePicker
-              defaultValue={selectedDate}
-              onChange={handleDateChange}
-            />
+    <Layout className="site-layout-background">
+      <Header className="header">  Traffic & Weather App</Header>
+      <Content  className="site-layout-content">
+        <div className="space-align-container">
+          <Space direction="vertical" size={12}>
+            <div className="inline">
+              <Space size="large">
+                <DatePicker defaultValue={selectedDate} onChange={handleDateChange} disabledDate={current => { return current > moment();}}/>
 
-            <TimePicker
-              use12Hours
-              secondStep={10}
-              onChange={handleTimeChange}
-            />
+                <TimePicker use12Hours secondStep={10} onChange={handleTimeChange} />
+              </Space>
+            </div>
+
+            <Button type="primary" block onClick={handleDateTimeChange}>
+              Check Traffic & Weather Conditions
+            </Button>
+            {showTrafficResults ? <TrafficWeatherConditions datetime={datetime} /> : null}
+            <br/>
           </Space>
         </div>
+        </Content>
 
-        <Button type="primary" block onClick={handleDateTimeChange}>
-          Check Traffic & Weather Conditions
-        </Button>
-        {showTrafficResults ? <TrafficWeatherConditions datetime={datetime} /> : null}
-        <br/>
-      </Space>
-    </div>
+        <Footer style={{ textAlign: 'center' }}>©2020</Footer>
+    </Layout>
   );
 }

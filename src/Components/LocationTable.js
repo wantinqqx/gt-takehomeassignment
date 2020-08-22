@@ -9,17 +9,23 @@ function LocationTable(props) {
   
   let latLngList = props.locations;
   let weatherInfoList = props.weather;
+  let areaInfoList = props.areaInfo;
+
+  let userLat = "";
+  let userLng = "";
   let camInfo = props.camInfo;
   let [tableData, setTableData] = React.useState([]);
+  const [userLatLng, setUserLatLng] = React.useState({});
   const [imageUrl, setImageUrl] = React.useState("");
 
   const [weatherInfo, setWeatherInfo] = React.useState("");
   const [selectedLocation, setSelectedLocation] = React.useState("");
+  const [selectedArea, setSelectedArea] = React.useState("");
   const [isLoading, setIsLoading] = React.useState(false);
-  const [showResultsImage, setShowResultsImage] = React.useState(false);
-  const [showResultsWeather, setShowResultsWeather] = React.useState(false);
+  const [showResults, setShowResults] = React.useState(false);
 
   useEffect(() => {
+    setWeatherInfo("");
     setIsLoading(true);
     async function fetchData() {
       await initializeDisplayArray(latLngList,defaultPageIndex,defaultPageSize,latLngList);
@@ -114,16 +120,43 @@ function LocationTable(props) {
 
   function displayWeatherInfo(userSelectedArea) {
     console.log(weatherInfoList);
-
+    const defaultArea = userSelectedArea.split(',');
+    setSelectedArea(defaultArea[0]);
+    userSelectedArea = defaultArea[0];
+    console.log(weatherInfoList.includes(userSelectedArea));
+    
     weatherInfoList.forEach((area) => {
-      const defaultArea = userSelectedArea.split(',');
-      let selectedArea = defaultArea[0];
-
-      if(area.area === selectedArea){
-        setWeatherInfo(area.forecast);
-        console.log(weatherInfo);
+       if(area.area === userSelectedArea){
+          setWeatherInfo(area.forecast);
+          return;
       }
     });
+
+  }
+
+  function findNearestWeatherInfo(latitude,longitude,areaDataFromWeather){
+    // console.log(userLat + ", " + userLng);
+    // console.log(userLatLng);
+    // console.log(areaDataFromWeather);
+
+    if (!areaDataFromWeather) {
+      return null;
+    }
+    let min = Infinity;
+    let nearest = -1;
+    for (let i = 0; i < areaDataFromWeather.length; i++) {
+      const data = areaDataFromWeather[i].label_location;
+      const curr = Math.abs(userLng - data.longitude) + Math.abs(userLat - data.latitude);
+
+      console.log(curr);
+
+      if (curr < min) {
+        min = curr;
+        nearest = i;
+      }
+    }
+    console.log(areaDataFromWeather[nearest].name);
+    return nearest > -1 ? areaDataFromWeather[nearest].name: null;
   }
 
   return (
@@ -131,25 +164,30 @@ function LocationTable(props) {
       <Table
         onRow={(r, i) => {
           return {
-            onClick: (e) => {
-              // console.log(r.area);
-              // console.log(r.location);
-              // console.log(r.key);
+            onClick: () => {
               displayWeatherInfo(r.area);
               setSelectedLocation(r.location);
+              userLat = camInfo[r.key].location.latitude;
+              userLng = camInfo[r.key].location.longitude;
+              console.log(userLat + " " + userLng);
+              setUserLatLng(camInfo[r.key].location);
               displayCameraImg(r.key);
-              setShowResultsImage(true);
-              setShowResultsWeather(true);
+              console.log(findNearestWeatherInfo(userLat,userLng,areaInfoList));
+              console.log(userLatLng);
+              setShowResults(true);
             },
           };
         }}
         columns={columns} dataSource={tableData} onChange={handlePageChange} loading={isLoading}
       />
 
-      {showResultsImage ? (
-         <Card hoverable className="responsive" cover={<img src={imageUrl} alt="trafficImage"  />} >
-           <Meta title={selectedLocation} description={weatherInfo} /></Card>
-         ) : null}
+      {showResults ? (
+         <Card hoverable className="responsive" cover={<img src={imageUrl} alt="trafficImage"  />}>
+           {weatherInfo!=="" ? 
+           <Meta title={selectedLocation} description={`Weather is forecasted to be ${weatherInfo} at ${selectedArea}`}/> : 
+            <Meta title={selectedLocation} description={`Sorry, weather forecast is not available for ${selectedArea}.`}/>
+          }
+        </Card>) : null}
     </div>
   );
 }

@@ -1,7 +1,7 @@
 import React, { useEffect } from "react";
 import axios from "axios";
 import LocationTable from "./LocationTable";
-import App from "../App";
+// import App from "../App";
 
 function TrafficWeatherConditions(props) {
   let selDateTime = props.datetime;
@@ -9,6 +9,7 @@ function TrafficWeatherConditions(props) {
   const [locations, setLocations] = React.useState([]);
   const [camInfo, setCamInfo] = React.useState([]);
   const [forecasts, setForecastInfo] = React.useState([]);
+  const [areaInfo, setAreaInfo] = React.useState([]);
 
   useEffect(() => getData(selDateTime), [selDateTime]);
 
@@ -47,14 +48,17 @@ function TrafficWeatherConditions(props) {
       })
       .then(function (response) {
         let weatherForecastInfo = response.data.items[0].forecasts;
+        let areaInfo = response.data.area_metadata;
+        console.log(areaInfo);
         setForecastInfo(weatherForecastInfo);
+        setAreaInfo(areaInfo);
       })
       .catch(function (error) {
         console.log(error);
       });
   }
 
-  return <LocationTable locations={locations} camInfo={camInfo} weather = {forecasts}/>;
+  return <LocationTable locations={locations} camInfo={camInfo} weather = {forecasts} areaInfo={areaInfo}/>;
 }
 
 export default TrafficWeatherConditions;
