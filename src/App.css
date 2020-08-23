@@ -12,17 +12,21 @@
   align-items: center;
   margin: 1rem 0;
   vertical-align: middle;
-  width: 100%;
+  max-width: 600px;
 }
 
 .image {
   display: flex;
   flex-wrap: wrap;
   padding: 0 4px;
+  max-width: 600px;
 }
 
 .site-layout-content {
   margin: 14px 16px 0; 
+  padding-left: 10px;
+  padding-right: 10px;
+  height: auto;
   overflow: initial; 
   background:#fff;
   min-height: 600px;
@@ -43,8 +47,6 @@
   align-items: center;
   align-content: center;
   justify-content: center;
-
-  /* margin: 0 auto 0 auto; */
 }
 .space-align-block {
   margin: 8px 4px;

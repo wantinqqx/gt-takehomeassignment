@@ -15,7 +15,6 @@ function LocationTable(props) {
   let userLng = "";
   let camInfo = props.camInfo;
   let [tableData, setTableData] = React.useState([]);
-  const [userLatLng, setUserLatLng] = React.useState({});
   const [imageUrl, setImageUrl] = React.useState("");
 
   const [weatherInfo, setWeatherInfo] = React.useState("");
@@ -42,11 +41,12 @@ function LocationTable(props) {
       title: "Street",
       dataIndex: "location",
       key: "location",
-      render: (text) => <a>{text}</a>,
+      render: (text) => <a href="#results">{text}</a>,
     },
   ];
 
   async function handlePageChange(e) {
+    setShowResults(false);
     const currentPage = e.current - 1;
     const pageSize = e.pageSize;
     setIsLoading(true);
@@ -55,15 +55,22 @@ function LocationTable(props) {
   }
 
   async function latLngToLocationList( initialArray, currentPage, pageSize, latLngLocationArr ) {
+    if (!initialArray || !latLngLocationArr) {
+      return null;
+    }
     console.log(`Current page: ${currentPage}, PageSize: ${pageSize}`);
     let promises = getReverseGeocodePromises(process.env.REACT_APP_API_KEY, latLngLocationArr, currentPage, pageSize);
     let resolvedList = await Promise.all(promises);
+    // console.log(resolvedList);
     let output = formatToTableDefinitions(initialArray,resolvedList, currentPage, pageSize);
     // console.table(output);
     setTableData(output);
   }
 
   async function initializeDisplayArray(initialArray,initialPageIndex,initialPageSize) {
+    if (!initialArray) {
+      return null;
+    }
     let fOut = initialArray.map((item, k) => {
       return {
         key: k,
@@ -75,6 +82,9 @@ function LocationTable(props) {
   }
 
   function formatToTableDefinitions(propData,geocodeResponse, startIndex, pageSize) {
+    if (!propData) {
+      return null;
+    }
     let rGeocodeArr = geocodeResponse.map((item) => item.data.results);
     let formattedLocations = rGeocodeArr.map((t, k) => {
       return {
@@ -99,7 +109,10 @@ function LocationTable(props) {
     return s;
   }
 
-  function getReverseGeocodePromises( key,locationsArray, startIndex, pageSize) {
+  function getReverseGeocodePromises(key,locationsArray, startIndex, pageSize) {
+    if (!locationsArray) {
+      return null;
+    }
     let promiseList = [];
     const start = startIndex * pageSize;
     let pageArray = locationsArray.slice(start, start + pageSize);
@@ -123,40 +136,43 @@ function LocationTable(props) {
     const defaultArea = userSelectedArea.split(',');
     setSelectedArea(defaultArea[0]);
     userSelectedArea = defaultArea[0];
-    console.log(weatherInfoList.includes(userSelectedArea));
     
     weatherInfoList.forEach((area) => {
        if(area.area === userSelectedArea){
           setWeatherInfo(area.forecast);
-          return;
       }
     });
-
+    // console.log(weatherInfo);
   }
 
   function findNearestWeatherInfo(latitude,longitude,areaDataFromWeather){
-    // console.log(userLat + ", " + userLng);
-    // console.log(userLatLng);
-    // console.log(areaDataFromWeather);
 
     if (!areaDataFromWeather) {
       return null;
     }
-    let min = Infinity;
+    let min = 300;
     let nearest = -1;
+
+    console.log(latitude + " " + longitude);
     for (let i = 0; i < areaDataFromWeather.length; i++) {
       const data = areaDataFromWeather[i].label_location;
-      const curr = Math.abs(userLng - data.longitude) + Math.abs(userLat - data.latitude);
-
-      console.log(curr);
+      const curr = Math.abs(longitude - data.longitude) + Math.abs(latitude - data.latitude);
 
       if (curr < min) {
         min = curr;
         nearest = i;
       }
     }
-    console.log(areaDataFromWeather[nearest].name);
-    return nearest > -1 ? areaDataFromWeather[nearest].name: null;
+    let nearestArea = nearest > -1 ? areaDataFromWeather[nearest].name: null;
+    setSelectedArea(nearestArea);
+    console.log(nearestArea);
+    displayWeatherInfo(nearestArea);
+  }
+
+  function resetVariables(){
+    setWeatherInfo("");
+    userLat = "";
+    userLng = "";
   }
 
   return (
@@ -165,28 +181,23 @@ function LocationTable(props) {
         onRow={(r, i) => {
           return {
             onClick: () => {
-              displayWeatherInfo(r.area);
+              resetVariables();              
               setSelectedLocation(r.location);
               userLat = camInfo[r.key].location.latitude;
               userLng = camInfo[r.key].location.longitude;
-              console.log(userLat + " " + userLng);
-              setUserLatLng(camInfo[r.key].location);
+              // console.log(userLat + " " + userLng);
               displayCameraImg(r.key);
-              console.log(findNearestWeatherInfo(userLat,userLng,areaInfoList));
-              console.log(userLatLng);
-              setShowResults(true);
+
+              findNearestWeatherInfo(userLat,userLng,areaInfoList);
+              setShowResults(true);              
             },
           };
         }}
-        columns={columns} dataSource={tableData} onChange={handlePageChange} loading={isLoading}
-      />
+        columns={columns} dataSource={tableData} onChange={handlePageChange} loading={isLoading} pagination={{showSizeChanger: false}}/>
 
       {showResults ? (
-         <Card hoverable className="responsive" cover={<img src={imageUrl} alt="trafficImage"  />}>
-           {weatherInfo!=="" ? 
-           <Meta title={selectedLocation} description={`Weather is forecasted to be ${weatherInfo} at ${selectedArea}`}/> : 
-            <Meta title={selectedLocation} description={`Sorry, weather forecast is not available for ${selectedArea}.`}/>
-          }
+         <Card id="results" hoverable className="responsive" cover={<img src={imageUrl} alt="trafficImage" />}>
+           <Meta title={selectedLocation} description={`Weather is forecasted to be ${weatherInfo} at ${selectedArea}`}/> 
         </Card>) : null}
     </div>
   );

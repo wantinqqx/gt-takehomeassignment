@@ -42,7 +42,7 @@ export default function App() {
       if (dateTime.length === 19) {
         setShowTrafficResults(true);
       }
-    } else {
+    }else {
       setShowTrafficResults(false);
       // setShowWeatheresults(false);
       alert("Date & Time cannot be empty!");
