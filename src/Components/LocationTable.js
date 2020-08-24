@@ -10,13 +10,13 @@ function LocationTable(props) {
   let latLngList = props.locations;
   let weatherInfoList = props.weather;
   let areaInfoList = props.areaInfo;
+  let camInfo = props.camInfo;
 
   let userLat = "";
   let userLng = "";
-  let camInfo = props.camInfo;
   let [tableData, setTableData] = React.useState([]);
-  const [imageUrl, setImageUrl] = React.useState("");
 
+  const [imageUrl, setImageUrl] = React.useState("");
   const [weatherInfo, setWeatherInfo] = React.useState("");
   const [selectedLocation, setSelectedLocation] = React.useState("");
   const [selectedArea, setSelectedArea] = React.useState("");
@@ -58,12 +58,9 @@ function LocationTable(props) {
     if (!initialArray || !latLngLocationArr) {
       return null;
     }
-    console.log(`Current page: ${currentPage}, PageSize: ${pageSize}`);
     let promises = getReverseGeocodePromises(process.env.REACT_APP_API_KEY, latLngLocationArr, currentPage, pageSize);
     let resolvedList = await Promise.all(promises);
-    // console.log(resolvedList);
     let output = formatToTableDefinitions(initialArray,resolvedList, currentPage, pageSize);
-    // console.table(output);
     setTableData(output);
   }
 
@@ -97,7 +94,6 @@ function LocationTable(props) {
       };
     });
     let s = propData;
-    console.log(propData);
     s.forEach((x) => {
       formattedLocations.forEach((f) => {
         if (x.key === f.key) {
@@ -132,7 +128,6 @@ function LocationTable(props) {
   }
 
   function displayWeatherInfo(userSelectedArea) {
-    // console.log(weatherInfoList);
     let defaultArea = userSelectedArea.split(',');
     setSelectedArea(defaultArea[0]);
     userSelectedArea = defaultArea[0];
@@ -142,7 +137,6 @@ function LocationTable(props) {
           setWeatherInfo(area.forecast);
       }
     });
-    // console.log(weatherInfo);
   }
 
   function findNearestWeatherInfo(latitude,longitude,areaDataFromWeather){
@@ -153,7 +147,6 @@ function LocationTable(props) {
     let min = 300;
     let nearest = -1;
 
-    console.log(latitude + " " + longitude);
     for (let i = 0; i < areaDataFromWeather.length; i++) {
       let data = areaDataFromWeather[i].label_location;
       let curr = Math.abs(longitude - data.longitude) + Math.abs(latitude - data.latitude);
@@ -165,7 +158,6 @@ function LocationTable(props) {
     }
     let nearestArea = nearest > -1 ? areaDataFromWeather[nearest].name: null;
     setSelectedArea(nearestArea);
-    // console.log(nearestArea);
     displayWeatherInfo(nearestArea);
   }
 
@@ -185,7 +177,6 @@ function LocationTable(props) {
               setSelectedLocation(r.location);
               userLat = camInfo[r.key].location.latitude;
               userLng = camInfo[r.key].location.longitude;
-              // console.log(userLat + " " + userLng);
               displayCameraImg(r.key);
 
               findNearestWeatherInfo(userLat,userLng,areaInfoList);

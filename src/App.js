@@ -48,7 +48,7 @@ export default function App() {
 
   return (
     <Layout className="site-layout-background">
-      <Header className="header">  Traffic & Weather App</Header>
+      <Header className="header">  Traffic &amp; Weather App</Header>
       <Content  className="site-layout-content">
         <div className="space-align-container">
           <Space direction="vertical" size={12}>
@@ -61,7 +61,7 @@ export default function App() {
             </div>
 
             <Button type="primary" block onClick={handleDateTimeChange}>
-              Check Traffic & Weather Conditions
+              Check Traffic &amp; Weather Conditions
             </Button>
             {showTrafficResults ? <TrafficWeatherConditions datetime={datetime} /> : null}
             <br/>
