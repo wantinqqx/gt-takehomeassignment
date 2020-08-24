@@ -132,8 +132,8 @@ function LocationTable(props) {
   }
 
   function displayWeatherInfo(userSelectedArea) {
-    console.log(weatherInfoList);
-    const defaultArea = userSelectedArea.split(',');
+    // console.log(weatherInfoList);
+    let defaultArea = userSelectedArea.split(',');
     setSelectedArea(defaultArea[0]);
     userSelectedArea = defaultArea[0];
     
@@ -155,8 +155,8 @@ function LocationTable(props) {
 
     console.log(latitude + " " + longitude);
     for (let i = 0; i < areaDataFromWeather.length; i++) {
-      const data = areaDataFromWeather[i].label_location;
-      const curr = Math.abs(longitude - data.longitude) + Math.abs(latitude - data.latitude);
+      let data = areaDataFromWeather[i].label_location;
+      let curr = Math.abs(longitude - data.longitude) + Math.abs(latitude - data.latitude);
 
       if (curr < min) {
         min = curr;
@@ -165,7 +165,7 @@ function LocationTable(props) {
     }
     let nearestArea = nearest > -1 ? areaDataFromWeather[nearest].name: null;
     setSelectedArea(nearestArea);
-    console.log(nearestArea);
+    // console.log(nearestArea);
     displayWeatherInfo(nearestArea);
   }
 

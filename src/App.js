@@ -32,10 +32,8 @@ export default function App() {
   };
 
   const handleDateTimeChange = () => {
-    // console.log(selectedTime);
-    // console.log(selectedDate === "");
     if (selectedTime !== null && selectedTime !== "" && selectedDate !== "" && selectedDate !== null) {
-      const dateTime = selectedDate + "T" + selectedTime;
+      let dateTime = selectedDate + "T" + selectedTime;
       setDatetime(dateTime);
       console.log(dateTime);
 
@@ -44,7 +42,6 @@ export default function App() {
       }
     }else {
       setShowTrafficResults(false);
-      // setShowWeatheresults(false);
       alert("Date & Time cannot be empty!");
     }
   };

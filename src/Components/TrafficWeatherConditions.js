@@ -50,7 +50,7 @@ function TrafficWeatherConditions(props) {
         let weatherForecastInfo = response.data.items[0].forecasts;
         let areaInfo = response.data.area_metadata;
 
-        console.log(areaInfo);
+        // console.log(areaInfo);
         setForecastInfo(weatherForecastInfo);
         setAreaInfo(areaInfo);
       })
