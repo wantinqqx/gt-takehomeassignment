@@ -7,36 +7,46 @@ import TrafficWeatherConditions from "./Components/TrafficWeatherConditions.js";
 export default function App() {
   require('dotenv').config();
 
+  let chosenDate = "";
+  let chosenTime = "";
+  let dateTime = "";
+
   const { Header, Content, Footer } = Layout;
   const [selectedDate, setSelectedDate] = React.useState("");
-  const [selectedTime, setSelectedTime] = React.useState(new Date());
-  const [datetime, setDatetime] = React.useState(new Date());
+  const [selectedTime, setSelectedTime] = React.useState("");
+  const [datetime, setDatetime] = React.useState("");
   const [showTrafficResults, setShowTrafficResults] = React.useState(false);
 
   const handleDateChange = (date) => {
+    console.log(date);
     if (date !== null) {
       date = date.format("YYYY-MM-DD");
       setSelectedDate(date);
-    } else if (date === null) {
+    } else {
+      // chosenDate = "";
       setSelectedDate("");
     }
+    console.log(chosenDate);
   };
 
   const handleTimeChange = (time) => {
+    console.log(time);
     if (time !== null) {
       time = time.format("HH:mm:ss");
       setSelectedTime(time);
-    } else if (time === "") {
+    } else {
       setSelectedTime("");
+      // chosenTime="";
     }
   };
 
   const handleDateTimeChange = () => {
-    if (selectedTime !== null && selectedTime !== "" && selectedDate !== "" && selectedDate !== null) {
+    console.log(selectedDate + " "+ selectedTime);
+
+    setShowTrafficResults(false);
+    if (selectedTime!== null && selectedTime !== "" && selectedDate !== "" && selectedDate !== null) {
       let dateTime = selectedDate + "T" + selectedTime;
       setDatetime(dateTime);
-      console.log(dateTime);
-
       if (dateTime.length === 19) {
         setShowTrafficResults(true);
       }
@@ -44,6 +54,8 @@ export default function App() {
       setShowTrafficResults(false);
       alert("Date & Time cannot be empty!");
     }
+
+
   };
 
   return (
@@ -56,7 +68,7 @@ export default function App() {
               <Space size="large">
                 <DatePicker defaultValue={selectedDate} onChange={handleDateChange} disabledDate={current => { return current > moment();}}/>
 
-                <TimePicker use12Hours secondStep={10} onChange={handleTimeChange} />
+                <TimePicker defaultValue={selectedTime} use12Hours secondStep={10} onChange={handleTimeChange} />
               </Space>
             </div>
 

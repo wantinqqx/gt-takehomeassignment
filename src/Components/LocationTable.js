@@ -22,8 +22,11 @@ function LocationTable(props) {
   const [selectedArea, setSelectedArea] = React.useState("");
   const [isLoading, setIsLoading] = React.useState(false);
   const [showResults, setShowResults] = React.useState(false);
+  const [currPage, setCurrentPage] = React.useState(1);
 
   useEffect(() => {
+    setShowResults(false);
+    setCurrentPage(1);
     setWeatherInfo("");
     setIsLoading(true);
     async function fetchData() {
@@ -49,6 +52,7 @@ function LocationTable(props) {
     setShowResults(false);
     const currentPage = e.current - 1;
     const pageSize = e.pageSize;
+    setCurrentPage(e.current);
     setIsLoading(true);
     await latLngToLocationList(tableData, currentPage, pageSize, latLngList);
     setIsLoading(false);
@@ -62,6 +66,7 @@ function LocationTable(props) {
     let resolvedList = await Promise.all(promises);
     let output = formatToTableDefinitions(initialArray,resolvedList, currentPage, pageSize);
     setTableData(output);
+    // console.log(output);
   }
 
   async function initializeDisplayArray(initialArray,initialPageIndex,initialPageSize) {
@@ -184,7 +189,7 @@ function LocationTable(props) {
             },
           };
         }}
-        columns={columns} dataSource={tableData} onChange={handlePageChange} loading={isLoading} pagination={{showSizeChanger: false}}/>
+        columns={columns} dataSource={tableData} onChange={handlePageChange} loading={isLoading} pagination={{showSizeChanger: false, current:currPage}}/>
 
       {showResults ? (
          <Card id="results" hoverable className="responsive" cover={<img src={imageUrl} alt="trafficImage" />}>
