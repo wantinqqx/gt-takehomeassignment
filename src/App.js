@@ -7,10 +7,6 @@ import TrafficWeatherConditions from "./Components/TrafficWeatherConditions.js";
 export default function App() {
   require('dotenv').config();
 
-  let chosenDate = "";
-  let chosenTime = "";
-  let dateTime = "";
-
   const { Header, Content, Footer } = Layout;
   const [selectedDate, setSelectedDate] = React.useState("");
   const [selectedTime, setSelectedTime] = React.useState("");
@@ -18,30 +14,24 @@ export default function App() {
   const [showTrafficResults, setShowTrafficResults] = React.useState(false);
 
   const handleDateChange = (date) => {
-    console.log(date);
     if (date !== null) {
       date = date.format("YYYY-MM-DD");
       setSelectedDate(date);
     } else {
-      // chosenDate = "";
       setSelectedDate("");
     }
-    console.log(chosenDate);
   };
 
   const handleTimeChange = (time) => {
-    console.log(time);
     if (time !== null) {
       time = time.format("HH:mm:ss");
       setSelectedTime(time);
     } else {
       setSelectedTime("");
-      // chosenTime="";
     }
   };
 
   const handleDateTimeChange = () => {
-    console.log(selectedDate + " "+ selectedTime);
 
     setShowTrafficResults(false);
     if (selectedTime!== null && selectedTime !== "" && selectedDate !== "" && selectedDate !== null) {
